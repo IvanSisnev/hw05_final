@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 
+
 def page_not_found(request, exception):
     """
     Отработать ответ "страница не найдена".

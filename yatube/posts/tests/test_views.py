@@ -10,6 +10,7 @@ from core.views import server_error, csrf_failure
 from .tests_setup import PostsTests
 from ..models import Post, Follow
 
+
 class ViewsTests(PostsTests):
     """
     Класс для проверки правильности шаблонов во view-функциях.
@@ -134,7 +135,7 @@ class ViewsTests(PostsTests):
         """
         # создание тестового поста для проверки подписки
         follow_post = Post.objects.create(
-            text=f'Пост для проверки подписки',
+            text='Пост для проверки подписки',
             author=self.author,
         )
 
@@ -186,5 +187,3 @@ class ViewsTests(PostsTests):
         response = server_error(self.authorized_client.get('/'))
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.template_name, 'core/500.html')
-
-
