@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}
+  <title>Записи выбранных авторов</title>
+{% endblock %}
+{% load thumbnail %}
+{% block content %}
+  <div class="container py-5">
+    {% include 'posts/includes/paginator.html' %}
+    <h3>Записи авторов, на которых вы подписаны</h3>
+    {% include 'posts/includes/switcher.html' %}
+    <article>
+      {% for post in page_obj %}
+      <ul>
+        <li>
+          Автор: <a href="{% url 'posts:profile' post.author.username %}">
+          {{ post.author.get_full_name }}</a>
+        </li>
+        <li>
+          Дата публикации: {{ post.pub_date|date:"j E Y" }}
+        </li>
+        {% if post.group %}
+        <li>
+          Группа: {{ post.group.title }}
+        </li>
+        {% endif %}
+      </ul>
+      <p>
+        {% thumbnail post.image "300x200" crop="center" as im %}
+        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+        {% endthumbnail %}
+      </p>
+      <p>
+        {{ post.text }}
+      </p>
+      <p>
+        <a href="{% url 'posts:post_detail' post.id %}">
+        Подробная информация</a>
+      </p>
+      {% if post.group %}
+      <p>
+        <a href="{% url 'posts:group_list' post.group.slug %}">
+        Все записи группы "{{ post.group.title }}"</a>
+      </p>
+      {% endif %}
+      {% if post.comments.all %}
+      <p>
+        Последние комментарии:
+      </p>
+      {% endif %}
+      {% for comment in post.comments.all|slice:':3' %}
+      <p>
+        {{ comment.created }}<br>
+        {{ comment.author }}: {{ comment }}
+      </p>
+      {% endfor %}
+      {% if not forloop.last %}
+      <hr>
+      {% endif %}
+      {% endfor %}
+    </article>
+    {% include 'posts/includes/paginator.html' %}
+  </div>
+{% endblock %}
