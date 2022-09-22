@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.cache import cache_page
 
 from .forms import PostForm, CommentForm
 from .models import Post, Group, User, Follow
