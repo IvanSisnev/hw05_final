@@ -99,7 +99,8 @@ class FormsTests(PostsTests):
         """
         form_data = {
             'text': 'Отредактированный текст нового поста',
-            'group': self.group.id
+            'group': self.group.id,
+            'image': '',
         }
         self.authorized_client.post(reverse('posts:post_edit',
                                             kwargs=self.pages_dict[
@@ -111,6 +112,7 @@ class FormsTests(PostsTests):
         self.assertEqual(edited_post.text, form_data['text'])
         self.assertEqual(edited_post.author, self.user)
         self.assertEqual(edited_post.group.id, form_data['group'])
+        self.assertEqual(edited_post.image, form_data['image'])
 
     def test_comment_unauth_create_redir(self):
         """

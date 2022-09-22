@@ -1,0 +1,11 @@
+{% if post.comments.all %}
+<p>
+  Последние комментарии:
+</p>
+{% endif %}
+{% for comment in post.comments.all|slice:':3' %}
+<p>
+  {{ comment.created }}<br>
+  {{ comment.author }}: {{ comment }}
+</p>
+{% endfor %}

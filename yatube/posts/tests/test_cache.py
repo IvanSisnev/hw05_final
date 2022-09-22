@@ -26,16 +26,28 @@ class CacheTests(PostsTests):
         """
 
         def get_response():
+            """
+            Забирает response с главной страницы.
+            """
             return self.authorized_client.get(reverse('posts:index'))
 
-        text = self.post.text
-        # запись есть на странице
-        self.assertContains(get_response(), text)
-        # удаление записи
+        # список постов со страницы
+        page_content = get_response().context['page_obj'].object_list
+        # самый свежий пост
+        post_to_test = page_content[0]
+        # сравнения по полям с последним созданным постом
+        self.assertEqual(post_to_test.text, self.post.text)
+        self.assertEqual(post_to_test.author, self.post.author)
+        self.assertEqual(post_to_test.group, self.post.group)
+
         self.post.delete()
-        # запись есть на кешированной странице
-        self.assertContains(get_response(), text)
+
+        # обращение к главной странице и сравнение состояний
+        page_content_cached = get_response().context['page_obj'].object_list
+        self.assertEqual(page_content, page_content_cached)
 
         cache.clear()
-        # записи нет на странице
-        self.assertNotContains(get_response(), text)
+
+        # повторное обращение к главной странице и сравнение
+        page_content_reloaded = get_response().context['page_obj'].object_list
+        self.assertNotEqual(page_content, page_content_reloaded)

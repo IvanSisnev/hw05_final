@@ -47,7 +47,10 @@ class UrlTests(PostsTests):
                     self.assertEqual(response.status_code, HTTPStatus.FOUND)
                     # проверка доступа для авторизованного пользователя
                     response = self.authorized_client.get(page_data['url'])
-                    self.assertEqual(response.status_code, HTTPStatus.OK)
+                    if 'redirect' in page_data:
+                        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                    else:
+                        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_404_status(self):
         """

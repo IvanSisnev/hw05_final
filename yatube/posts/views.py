@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -17,15 +18,19 @@ def paginate(request, posts):
     return paginator.get_page(page_number)
 
 
-@cache_page(settings.CACHES['default']['TIMEOUT'], key_prefix='index_page')
 def index(request):
     """
     Обработать запрос перехода на главную страницу.
     """
     template = 'posts/index.html'
-    posts = Post.objects.all()
-    page_obj = paginate(request, posts)
 
+    # кеширование
+    posts = cache.get('index_page')
+    if not posts:
+        posts = Post.objects.all()
+        cache.set('index_page', posts, settings.CACHES['default']['TIMEOUT'])
+
+    page_obj = paginate(request, posts)
     context: dict = {
         'posts': posts,
         'page_obj': page_obj,
@@ -38,8 +43,8 @@ def group_posts(request, slug):
     Обработать запрос перехода на страницу с записями сообщества.
     """
     template = 'posts/group_list.html'
-    group: Group = get_object_or_404(Group, slug=slug)
-    posts: Post = group.posts.all()
+    group = get_object_or_404(Group, slug=slug)
+    posts = group.posts.all()
     page_obj = paginate(request, posts)
 
     context: dict = {
@@ -63,16 +68,14 @@ def profile(request, username):
     num_of_followers = user.following.count()
     # количество подписок
     num_of_following = user.follower.count()
-    # проверка, пользователь это автор или нет
-    user_is_author = bool(request.user == user)
-    following = bool(user.following.filter(user_id=request.user.id))
+    # проверка имеющейся подписки
+    following = user.following.filter(user_id=request.user.id).exists()
 
     context: dict = {
         'author': user,
         'posts': posts,
         'page_obj': page_obj,
         'following': following,
-        'user_is_author': user_is_author,
         'num_of_followers': num_of_followers,
         'num_of_following': num_of_following,
     }
@@ -185,9 +188,7 @@ def follow_index(request):
     Обработать запрос перехода на страницу с записями выбранных авторов.
     """
     template = 'posts/follow.html'
-    user = request.user
-    posts = Post.objects.filter(author__in=(follow.author for follow in
-                                            user.follower.all()))
+    posts = Post.objects.filter(author__following__user=request.user)
     page_obj = paginate(request, posts)
 
     context: dict = {
@@ -203,9 +204,8 @@ def profile_follow(request, username):
     Обработать запрос на подписку на автора.
     """
     author = get_object_or_404(User, username=username)
-    if author != request.user and not Follow.objects.filter(
-            user=request.user, author=author).exists():
-        Follow.objects.create(user=request.user, author=author)
+    if author != request.user:
+        Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username=username)
 
 

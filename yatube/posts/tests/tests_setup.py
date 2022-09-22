@@ -97,12 +97,17 @@ class PostsTests(TestCase):
                     'data': list(Post.objects.all())
                 }
             },
-            'posts:post_create': {
-                'url': '/create/',
-                'param': None,
-                'template': 'posts/create_post.html',
-                'form': True,
-                'access': 'limited',
+            'posts:group_list': {
+                'url': f'/group/{cls.group.slug}/',
+                'param': {'slug': cls.group.slug},
+                'template': 'posts/group_list.html',
+                'access': 'unlimited',
+                'paginator': True,
+                'context': {
+                    'variable': 'posts',
+                    'test_method': list,
+                    'data': list(cls.group.posts.all()),
+                }
             },
             'posts:profile': {
                 'url': f'/profile/{cls.user.username}/',
@@ -116,18 +121,6 @@ class PostsTests(TestCase):
                     'data': list(cls.user.posts.all())
                 }
             },
-            'posts:group_list': {
-                'url': f'/group/{cls.group.slug}/',
-                'param': {'slug': cls.group.slug},
-                'template': 'posts/group_list.html',
-                'access': 'unlimited',
-                'paginator': True,
-                'context': {
-                    'variable': 'posts',
-                    'test_method': list,
-                    'data': list(cls.group.posts.all()),
-                }
-            },
             'posts:post_detail': {
                 'url': f'/posts/{cls.post.id}/',
                 'param': {'post_id': cls.post.id},
@@ -137,6 +130,13 @@ class PostsTests(TestCase):
                     'variable': 'post',
                     'data': Post.objects.get(pk=cls.post.id),
                 }
+            },
+            'posts:post_create': {
+                'url': '/create/',
+                'param': None,
+                'template': 'posts/create_post.html',
+                'form': True,
+                'access': 'limited',
             },
             'posts:post_edit': {
                 'url': f'/posts/{cls.post.id}/edit/',
@@ -149,12 +149,36 @@ class PostsTests(TestCase):
                     'data': Post.objects.get(pk=cls.post.id),
                 }
             },
-            'posts:add_comment': {
-                # 'url': f'/posts/{cls.post.id}/comment/',
+            'posts:post_delete': {
+                # 'url': f'/posts/{cls.post.id}/delete/',
+                'redirect': True,
                 'param': {'post_id': cls.post.id},
-                # 'template': 'posts/post_detail.html',
                 'access': 'limited',
-            }
+            },
+            'posts:add_comment': {
+                'url': f'/posts/{cls.post.id}/comment/',
+                'redirect': True,
+                'param': {'post_id': cls.post.id},
+                'access': 'limited',
+            },
+            'posts:follow_index': {
+                'url': '/follow/',
+                'param': None,
+                'template': 'posts/follow.html',
+                'access': 'limited',
+            },
+            'posts:profile_follow': {
+                'url': f'/profile/{cls.user.username}/follow/',
+                'redirect': True,
+                'param': {'username': cls.user.username},
+                'access': 'limited',
+            },
+            'posts:profile_unfollow': {
+                # 'url': f'/profile/{cls.user.username}/unfollow/',
+                'redirect': True,
+                'param': {'username': cls.user.username},
+                'access': 'limited',
+            },
         }
 
     @classmethod

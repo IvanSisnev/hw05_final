@@ -118,34 +118,66 @@ class ViewsTests(PostsTests):
     def test_auth_follow(self):
         """
         Проверяет то, что авторизованный пользователь может подписываться на
-        других пользователей и удалять их из подписок.
+        других пользователей.
         """
         # сравнение объекта Follow из БД с тестовой подпиской
-        follow = Follow.objects.first()
-        self.assertEqual(follow.author, self.follow.author)
-        self.assertEqual(follow.user, self.follow.user)
+        self.follow = Follow.objects.first()
+        self.assertEqual(self.follow.author, self.follow.author)
+        self.assertEqual(self.follow.user, self.follow.user)
+
+    def test_unfollow(self):
+        """
+        Проверяет, что механизм отписки работает.
+        """
         # удаление подписки и проверка удаления
-        follow.delete()
+        self.follow.delete()
         self.assertIsNone(Follow.objects.first())
 
     def test_follow_post(self):
         """
-        Проверяет новая запись пользователя появляется в ленте тех, кто на
+        Проверяет, что новая запись пользователя появляется в ленте тех, кто на
         него подписан и не появляется в ленте тех, кто не подписан.
         """
+        # создание тестовой подписки
+        self.follow = Follow.objects.create(
+            user=self.user,
+            author=self.author,
+        )
+
         # создание тестового поста для проверки подписки
-        follow_post = Post.objects.create(
+        self.follow_post = Post.objects.create(
             text='Пост для проверки подписки',
             author=self.author,
         )
 
         # проверка наличия поста на странице подписавшегося
         response = self.authorized_client.get(reverse('posts:follow_index'))
-        self.assertContains(response, follow_post)
+        self.assertContains(response, self.follow_post)
 
         # проверка отсутствия поста на странице неподписавшегося
         response = self.authorized_client_2.get(reverse('posts:follow_index'))
-        self.assertNotContains(response, follow_post)
+        self.assertNotContains(response, self.follow_post)
+
+    def test_unfollow_post(self):
+        """
+        Проверяет, что новая запись пользователя не появляется в ленте тех,
+        кто не подписан.
+        """
+        # создание тестовой подписки
+        self.follow = Follow.objects.create(
+            user=self.user,
+            author=self.author,
+        )
+
+        # создание тестового поста для проверки подписки
+        self.follow_post = Post.objects.create(
+            text='Пост для проверки подписки',
+            author=self.author,
+        )
+
+        # проверка отсутствия поста на странице неподписавшегося
+        response = self.authorized_client_2.get(reverse('posts:follow_index'))
+        self.assertNotContains(response, self.follow_post)
 
     def test_self_follow(self):
         """

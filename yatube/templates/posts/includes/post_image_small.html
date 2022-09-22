@@ -1,0 +1,4 @@
+{% load thumbnail %}
+{% thumbnail post.image "300x200" crop="center" as im %}
+<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+{% endthumbnail %}

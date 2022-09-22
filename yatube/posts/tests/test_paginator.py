@@ -22,8 +22,6 @@ class PaginatorTests(PostsTests):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-        cache.clear()
-
     def test_paginator(self):
         """
         Проверить правильность работы паджинатора на страницах.
@@ -55,3 +53,4 @@ class PaginatorTests(PostsTests):
                     else:
                         self.assertEqual(len(response.context['page_obj']),
                                          total_posts)
+                    cache.clear()
