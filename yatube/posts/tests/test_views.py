@@ -144,8 +144,10 @@ class ViewsTests(PostsTests):
             'author': self.author,
         }
         self.authorized_client.post(reverse('posts:profile_follow',
-                                            kwargs={'username':
-                                                        self.author.username}),
+                                            kwargs={
+                                                'username':
+                                                    self.author.username
+                                            }),
                                     data=form_data, follow=True)
 
         # создание тестового поста для проверки подписки
