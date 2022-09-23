@@ -2,11 +2,11 @@
 Файл с тестами view-функций проекта.
 """
 
+from core.views import server_error, csrf_failure
 from django.core.cache import cache
 from django.test import Client
 from django.urls import reverse
 
-from core.views import server_error, csrf_failure
 from .tests_setup import PostsTests
 from ..models import Post, Follow
 
@@ -120,16 +120,10 @@ class ViewsTests(PostsTests):
         Проверяет то, что авторизованный пользователь может подписываться на
         других пользователей.
         """
-        # создание тестовой подписки
-        self.follow = Follow.objects.create(
-            user=self.user,
-            author=self.author,
-        )
-
         # сравнение объекта Follow из БД с тестовой подпиской
-        self.latest_follow = Follow.objects.first()
-        self.assertEqual(self.latest_follow.author, self.follow.author)
-        self.assertEqual(self.latest_follow.user, self.follow.user)
+        self.follow = Follow.objects.first()
+        self.assertEqual(self.follow.author, self.follow.author)
+        self.assertEqual(self.follow.user, self.follow.user)
 
     def test_unfollow(self):
         """
@@ -145,10 +139,14 @@ class ViewsTests(PostsTests):
         него подписан и не появляется в ленте тех, кто не подписан.
         """
         # создание тестовой подписки
-        self.follow = Follow.objects.create(
-            user=self.user,
-            author=self.author,
-        )
+        form_data = {
+            'user': self.user,
+            'author': self.author,
+        }
+        self.authorized_client.post(reverse('posts:profile_follow',
+                                            kwargs={'username':
+                                                        self.author.username}),
+                                    data=form_data, follow=True)
 
         # создание тестового поста для проверки подписки
         self.follow_post = Post.objects.create(
@@ -166,14 +164,9 @@ class ViewsTests(PostsTests):
 
     def test_unfollow_post(self):
         """
-        Проверяет, что новая запись пользователя не появляется в ленте тех,
-        кто не подписан.
+        Проверяет, что новая запись автора, подписка на которого отменена,
+        не появляется в ленте отписавшегося.
         """
-        # создание тестовой подписки
-        self.follow = Follow.objects.create(
-            user=self.user,
-            author=self.author,
-        )
 
         # создание тестового поста для проверки подписки
         self.follow_post = Post.objects.create(
@@ -181,8 +174,15 @@ class ViewsTests(PostsTests):
             author=self.author,
         )
 
-        # проверка отсутствия поста на странице неподписавшегося
-        response = self.authorized_client_2.get(reverse('posts:follow_index'))
+        # отмена подписки
+        self.authorized_client.post(reverse(
+            'posts:profile_unfollow', kwargs={
+                'username': self.author.username
+            }
+        ))
+
+        # проверка отсутствия поста на странице отписавшегося
+        response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertNotContains(response, self.follow_post)
 
     def test_self_follow(self):
