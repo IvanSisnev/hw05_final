@@ -120,10 +120,16 @@ class ViewsTests(PostsTests):
         Проверяет то, что авторизованный пользователь может подписываться на
         других пользователей.
         """
+        # создание тестовой подписки
+        self.follow = Follow.objects.create(
+            user=self.user,
+            author=self.author,
+        )
+
         # сравнение объекта Follow из БД с тестовой подпиской
-        self.follow = Follow.objects.first()
-        self.assertEqual(self.follow.author, self.follow.author)
-        self.assertEqual(self.follow.user, self.follow.user)
+        self.latest_follow = Follow.objects.first()
+        self.assertEqual(self.latest_follow.author, self.follow.author)
+        self.assertEqual(self.latest_follow.user, self.follow.user)
 
     def test_unfollow(self):
         """

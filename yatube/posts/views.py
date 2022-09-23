@@ -53,7 +53,6 @@ def group_posts(request, slug):
     }
     return render(request, template, context)
 
-
 def profile(request, username):
     """
     Обработать запрос перехода на страницу пользователя.
