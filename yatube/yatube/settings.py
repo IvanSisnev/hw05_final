@@ -25,14 +25,9 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = '1845p^uw%#2d1kk1(7s$w)++j-1y9&a_p19b-4-+!0(=6v34zf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '[::1]',
-    'testserver',
-]
+ALLOWED_HOSTS = ['51.250.90.120', '127.0.0.1', 'localhost']
 
 #  Подключение движка эмуляции почтового сервера
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
