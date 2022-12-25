@@ -145,7 +145,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
-# КОНСТАНТА КОЛИЧЕСТВА СТРАНИЦ ДЛЯ PAGINATOR
+# КОНСТАНТА КОЛИЧЕСТВА СТРАНИЦ ДЛЯ PAGINATORa
 PAGE_NUM = 10
 
 # ПЕРЕОПРЕДЕЛЕНИЕ КОНСТАНТЫ ОШИБКИ 403
